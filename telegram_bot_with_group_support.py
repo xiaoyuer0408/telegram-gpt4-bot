@@ -4,6 +4,7 @@ import openai
 import os
 import time
 import json
+from PIL import Image, ImageDraw, ImageFont
 
 # 配置你的 OpenAI 和 Telegram Token
 openai.api_key = 'YOUR_OPENAI_API_KEY'
@@ -14,8 +15,11 @@ user_sessions = {}
 
 # 图片生成函数
 def generate_image(text):
-    # 实现图片生成逻辑
-    pass
+    image = Image.new("RGB", (500, 200), (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("arial.ttf", 20)
+    draw.text((10, 10), text, fill=(0, 0, 0), font=font)
+    image.save("generated_image.png")
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Hello, I am a chat bot. How can I assist you today?')
@@ -23,6 +27,10 @@ def start(update: Update, context: CallbackContext) -> None:
 def respond(update: Update, context: CallbackContext) -> None:
     message = update.message.text
     chat_id = update.effective_chat.id
+
+    # 如果是在群聊中，检查消息是否是由机器人自身发送的
+    if update.message.from_user.is_bot:
+        return
 
     # 如果用户是新的，创建一个新的会话ID
     if chat_id not in user_sessions:
@@ -49,13 +57,14 @@ def respond(update: Update, context: CallbackContext) -> None:
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": message},
-                    {"role": "custom", "content": "Custom Role Content"}  # 添加自定义角色
+                    {"role": "custom", "content": "Custom Role Content"}  # 修改自定义角色的标识符和内容
                 ],
                 session_id=session_id,
             )
             response = response['choices'][0]['message']['content']
 
-        update.message.reply_text(response)
+        # 向该用户发送响应框
+        context.bot.send_message(chat_id=chat_id, text=response, reply_to_message_id=update.message.message_id)
 
 def save_session_data() -> None:
     # 保存会话数据到文件
@@ -66,8 +75,9 @@ def load_session_data() -> None:
     # 从文件加载会话数据
     global user_sessions
     try:
-        with open("session_data.json", "r") as f:
-            user_sessions = json.load(f)
+        with open("session
+    with open("session_data.json", "r") as f:
+        user_sessions = json.load(f)
     except FileNotFoundError:
         user_sessions = {}
 
@@ -80,13 +90,12 @@ def main() -> None:
     load_session_data()
 
     # 创建 Updater 对象并设置 Telegram Token
-    updater = Updater(token=TELEGRAM_TOKEN)
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
 
     # 获取 Dispatcher 对象
     dispatcher = updater.dispatcher
 
     # 添加处理程序
-    dispatcher.add_handler(CommandHandler("start", start
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, respond))
 
