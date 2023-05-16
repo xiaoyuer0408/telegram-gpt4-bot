@@ -75,41 +75,40 @@ def load_session_data() -> None:
     # 从文件加载会话数据
     global user_sessions
     try:
-        with open("session
-    with open("session_data.json", "r") as f:
-        user_sessions = json.load(f)
+        with open("session_data.json", "r") as f:
+            user_sessions = json.load(f)
     except FileNotFoundError:
         user_sessions = {}
 
-def error_handler(update: Update, context: CallbackContext) -> None:
-    """处理运行时的错误并发送错误消息给用户"""
-    update.message.reply_text("Oops! An error occurred. Please try again later.")
+def error_handler
+(update: Update, context: CallbackContext) -> None:
+"""处理运行时的错误并发送错误消息给用户"""
+update.message.reply_text("Oops! An error occurred. Please try again later.")
 
 def main() -> None:
-    # 加载之前保存的会话数据
-    load_session_data()
+# 加载之前保存的会话数据
+load_session_data()
+# 创建 Updater 对象并设置 Telegram Token
+updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
 
-    # 创建 Updater 对象并设置 Telegram Token
-    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+# 获取 Dispatcher 对象
+dispatcher = updater.dispatcher
 
-    # 获取 Dispatcher 对象
-    dispatcher = updater.dispatcher
+# 添加处理程序
+dispatcher.add_handler(CommandHandler("start", start))
+dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, respond))
 
-    # 添加处理程序
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, respond))
+# 添加错误处理程序
+dispatcher.add_error_handler(error_handler)
 
-    # 添加错误处理程序
-    dispatcher.add_error_handler(error_handler)
+# 开始轮询更新
+updater.start_polling()
 
-    # 开始轮询更新
-    updater.start_polling()
+# 在程序结束之前保存会话数据
+save_session_data()
 
-    # 在程序结束之前保存会话数据
-    save_session_data()
+# 进入空闲状态
+updater.idle()
 
-    # 进入空闲状态
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+if name == 'main':
+main()
