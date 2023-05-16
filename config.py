@@ -1,6 +1,4 @@
-import openai
-import os
+# 配置文件，用于存储 API 密钥和其他设置
 
-# 配置你的 OpenAI 和 Telegram Token
 openai.api_key = 'YOUR_OPENAI_API_KEY'
 TELEGRAM_TOKEN = 'YOUR_TELEGRAM_TOKEN'
