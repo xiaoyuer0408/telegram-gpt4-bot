@@ -1,9 +1,15 @@
 from PIL import Image, ImageDraw, ImageFont
 
-# 图片生成函数
-def generate_image(text):
-    image = Image.new("RGB", (500, 200), (255, 255, 255))
+def generate_image(text, font_file="arial.ttf", image_size=(500, 200)):
+    """
+    生成包含给定文本的图像
+    参数：
+        text - 要在图像上显示的文本
+        font_file - 可选参数，字体文件名，默认为 "arial.ttf"
+        image_size - 可选参数，生成图像的尺寸，默认为 (500, 200)
+    """
+    image = Image.new("RGB", image_size, (255, 255, 255))
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("arial.ttf", 20)
+    font = ImageFont.truetype(font_file, 20)
     draw.text((10, 10), text, fill=(0, 0, 0), font=font)
     image.save("generated_image.png")
