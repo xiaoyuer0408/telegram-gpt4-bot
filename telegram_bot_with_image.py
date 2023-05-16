@@ -4,7 +4,6 @@ import openai
 import os
 import time
 import json
-from PIL import Image, ImageDraw, ImageFont
 
 # 配置你的 OpenAI 和 Telegram Token
 openai.api_key = 'YOUR_OPENAI_API_KEY'
@@ -15,11 +14,8 @@ user_sessions = {}
 
 # 图片生成函数
 def generate_image(text):
-    image = Image.new("RGB", (500, 200), (255, 255, 255))
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("arial.ttf", 20)
-    draw.text((10, 10), text, fill=(0, 0, 0), font=font)
-    image.save("generated_image.png")
+    # 实现图片生成逻辑
+    pass
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Hello, I am a chat bot. How can I assist you today?')
@@ -44,16 +40,22 @@ def respond(update: Update, context: CallbackContext) -> None:
         # 发送生成的图片给用户
         context.bot.send_photo(chat_id=chat_id, photo=open("generated_image.png", "rb"))
     else:
-        # 使用 Chat API 进行会话
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # 更换为你选择的模型
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": message},
-            ],
-            session_id=session_id,
-        )
-        update.message.reply_text(response['choices'][0]['message']['content'])
+        if "Who are you?" in message:
+            response = "I am a friendly chat bot. I'm here to assist you with any questions you have. How can I help you today?"
+        else:
+            # 使用 Chat API 进行会话
+            response = openai.ChatCompletion.create(
+                model="gpt-4",  # 更换为你选择的模型
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": message},
+                    {"role": "custom", "content": "Custom Role Content"}  # 添加自定义角色
+                ],
+                session_id=session_id,
+            )
+            response = response['choices'][0]['message']['content']
+
+        update.message.reply_text(response)
 
 def save_session_data() -> None:
     # 保存会话数据到文件
@@ -84,6 +86,7 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     # 添加处理程序
+    dispatcher.add_handler(CommandHandler("start", start
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, respond))
 
