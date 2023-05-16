@@ -3,9 +3,9 @@ import openai
 import time
 import json
 from PIL import Image, ImageDraw, ImageFont
-from .config import openai, TELEGRAM_TOKEN
-from .image_gen import generate_image
-from .database import save_message, get_messages, user_sessions
+from config import openai, TELEGRAM_TOKEN
+from image_gen import generate_image
+from database import save_message, get_messages, user_sessions
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Hello, I am a chat bot. How can I assist you today?')
