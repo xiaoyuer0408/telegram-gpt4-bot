@@ -2,9 +2,11 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 import openai
 import os
+import time
+import json
 
 # 配置你的 OpenAI 和 Telegram Token
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = 'YOUR_OPENAI_API_KEY'
 TELEGRAM_TOKEN = 'YOUR_TELEGRAM_TOKEN'
 
 # 为每个用户创建一个会话ID以管理多轮对话
@@ -24,7 +26,7 @@ def respond(update: Update, context: CallbackContext) -> None:
     session_id = user_sessions[chat_id]
     # 使用 Chat API 进行会话
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # 更换为你选择的模型
+        model="gpt-4",  # 更换为你选择的模型
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": message},
@@ -33,7 +35,24 @@ def respond(update: Update, context: CallbackContext) -> None:
     )
     update.message.reply_text(response['choices'][0]['message']['content'])
 
+def save_session_data() -> None:
+    # 保存会话数据到文件
+    with open("session_data.json", "w") as f:
+        json.dump(user_sessions, f)
+
+def load_session_data() -> None:
+    # 从文件加载会话数据
+    global user_sessions
+    try:
+        with open("session_data.json", "r") as f:
+            user_sessions = json.load(f)
+    except FileNotFoundError:
+        user_sessions = {}
+
 def main() -> None:
+    # 加载之前保存的会话数据
+    load_session_data()
+
     updater = Updater(token=TELEGRAM_TOKEN)
 
     dispatcher = updater.dispatcher
@@ -42,6 +61,9 @@ def main() -> None:
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, respond))
 
     updater.start_polling()
+
+    # 在程序结束之前保存会话数据
+    save_session_data()
 
     updater.idle()
 
