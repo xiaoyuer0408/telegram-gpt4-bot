@@ -11,7 +11,13 @@ def generate_image(text, output_filename="generated_image.png", font_file="arial
     """
     image = Image.new("RGB", image_size, (255, 255, 255))
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_file, 20)
+
+    try:
+        font = ImageFont.truetype(font_file, 20)
+    except IOError:
+        print(f"Font file {font_file} not found. Using default font.")
+        font = ImageFont.load_default()
+
     draw.text((10, 10), text, fill=(0, 0, 0), font=font)
 
     with open(output_filename, "wb") as f:
