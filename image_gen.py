@@ -12,4 +12,7 @@ def generate_image(text, font_file="arial.ttf", image_size=(500, 200)):
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(font_file, 20)
     draw.text((10, 10), text, fill=(0, 0, 0), font=font)
-    image.save("generated_image.png")
+
+    with open("generated_image.png", "wb") as f:
+        image.save(f)
+
